@@ -1,0 +1,3 @@
+[submodule "src/sub-repo"]
+	path = src/sub-repo
+	url = git@github.com:SUN-TN/sub-module-test.git
