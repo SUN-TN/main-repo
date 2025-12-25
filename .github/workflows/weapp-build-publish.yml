@@ -61,20 +61,26 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
+      # 第一步：先安装 pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      # 第二步：再配置 Node.js，并启用 pnpm 缓存（此时 pnpm 已存在）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # 根据子模块的Node版本需求调整
-          cache: 'pnpm' # 开启pnpm缓存，加速依赖安装
+          node-version: 22
+          cache: 'pnpm' # 现在能找到 pnpm，正常解析缓存
 
-      - name: Install pnpm
-        working-directory: ./src/weapp
-        run: npm i -g pnpm
-
+      # 第三步: 安装依赖
       - name: Install dependencies in weapp
         working-directory: ./src/weapp # 直接指定子模块工作目录
         run: pnpm install # 安装子模块依赖
 
+      # 第四步: 运行构建命令
       - name: Build weapp preview package
         working-directory: ./src/weapp
         run: npm run build:weapp:preview # 执行小程序预览构建命令
