@@ -74,6 +74,8 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm' # 现在能找到 pnpm，正常解析缓存
+          # 指定子模块目录下的 pnpm-lock.yaml 路径，解决锁文件找不到的问题
+          cache-dependency-path: ./src/weapp/pnpm-lock.yaml
 
       # 第三步: 安装依赖
       - name: Install dependencies in weapp
