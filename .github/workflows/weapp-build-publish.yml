@@ -1,9 +1,9 @@
 name: Weapp-Client Submodule Build
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   check-submodule:
@@ -17,31 +17,37 @@ jobs:
           submodules: recursive
           fetch-depth: 2
 
-      - name: Detect weapp-client submodule update
+      - name: Detect weapp submodule update
         id: check
         run: |
           SUBMODULE_PATH="src/weapp/"
           INCLUDE_GITMODULES=true
 
+          # 修复：兼容首次提交（无HEAD^）的情况，避免rev-parse报错
           if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
           else
-            CHANGED_FILES=$(git ls-files)
+          CHANGED_FILES=$(git ls-files)
           fi
 
           echo "=== Changed files ==="
           echo "$CHANGED_FILES"
 
-          SUBMODULE_CHANGES=$(echo "$CHANGED_FILES" | grep "^$SUBMODULE_PATH")
+          # 修复1：匹配子模块路径（兼容带/和不带/的情况，同时匹配子模块目录和其下文件）
+          SUBMODULE_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^${SUBMODULE_PATH%/}($|/)")
+
+          # 修复2：单独处理.gitmodules变更，避免空值拼接问题
           if [ "$INCLUDE_GITMODULES" = true ]; then
-            GITMODULES_CHANGE=$(echo "$CHANGED_FILES" | grep "^.gitmodules$")
-            SUBMODULE_CHANGES="$SUBMODULE_CHANGES$GITMODULES_CHANGE"
+            if echo "$CHANGED_FILES" | grep -q "^.gitmodules$"; then
+              SUBMODULE_CHANGES="$(echo "$SUBMODULE_CHANGES"; echo ".gitmodules")"
+            fi
           fi
 
-          if [ -n "$SUBMODULE_CHANGES" ]; then
-            echo "is_weapp_client_updated=true" >> $GITHUB_OUTPUT
+          # 修复3：用grep -q判断非空，避免test命令的特殊字符问题
+          if echo "$SUBMODULE_CHANGES" | grep -q .; then
+            echo "is_weapp_client_updated=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_weapp_client_updated=false" >> $GITHUB_OUTPUT
+            echo "is_weapp_client_updated=false" >> "$GITHUB_OUTPUT"
           fi
 
   build-weapp-client:
@@ -58,19 +64,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22  # 根据子模块的Node版本需求调整
-          cache: 'pnpm'     # 开启pnpm缓存，加速依赖安装
+          node-version: 22 # 根据子模块的Node版本需求调整
+          cache: 'pnpm' # 开启pnpm缓存，加速依赖安装
 
       - name: Install pnpm
-        run: npm install -g pnpm  # 全局安装pnpm
+        run: npm install -g pnpm # 全局安装pnpm
 
       - name: Install dependencies in weapp-client
-        working-directory: ./packages/weapp-client  # 直接指定子模块工作目录
-        run: pnpm install  # 安装子模块依赖
+        working-directory: ./packages/weapp-client # 直接指定子模块工作目录
+        run: pnpm install # 安装子模块依赖
 
       - name: Build weapp preview package
         working-directory: ./packages/weapp-client
-        run: npm run build:weapp:preview  # 执行小程序预览构建命令
+        run: npm run build:weapp:preview # 执行小程序预览构建命令
+
 
       # 可选：上传构建产物作为Artifacts，方便下载查看
       # - name: Upload build artifacts
