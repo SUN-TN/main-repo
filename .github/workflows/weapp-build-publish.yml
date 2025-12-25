@@ -70,10 +70,7 @@ jobs:
 
       - name: Install pnpm
         working-directory: ./src/weapp
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-          cache-dir: ${{ steps.setup-node.outputs.cache-dir }} # 关联 Node 缓存目录
+        run: npm i -g pnpm
 
       - name: Install dependencies in weapp
         working-directory: ./src/weapp # 直接指定子模块工作目录
