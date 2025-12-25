@@ -62,7 +62,6 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Node.js
-        working-directory: ./src/weapp
         uses: actions/setup-node@v4
         with:
           node-version: 22 # 根据子模块的Node版本需求调整
