@@ -1,3 +1,6 @@
 [submodule "src/sub-repo"]
 	path = src/sub-repo
 	url = git@github.com:SUN-TN/sub-module-test.git
+[submodule "src/weapp"]
+	path = src/weapp
+	url = git@github.com:SUN-TN/test-weapp-ci-cd.git
