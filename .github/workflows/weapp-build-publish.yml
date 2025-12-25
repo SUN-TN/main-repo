@@ -62,15 +62,15 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
         working-directory: ./src/weapp
+        uses: actions/setup-node@v4
         with:
           node-version: 22 # 根据子模块的Node版本需求调整
           cache: 'pnpm' # 开启pnpm缓存，加速依赖安装
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
         working-directory: ./src/weapp
+        uses: pnpm/action-setup@v4
         with:
           version: latest
           cache-dir: ${{ steps.setup-node.outputs.cache-dir }} # 关联 Node 缓存目录
