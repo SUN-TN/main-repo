@@ -1,0 +1,55 @@
+name: Weapp-Client Submodule Build Preview
+on:
+  push:
+    branches: [main]
+    paths:
+    - 'src/weapp/**'
+    - '.github/workflows/weapp-client-build-preview.yml'
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  build-weapp-client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      # 第一步：先安装 pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          run_install: false
+
+      # 第二步：再配置 Node.js，并启用 pnpm 缓存（此时 pnpm 已存在）
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm' # 现在能找到 pnpm，正常解析缓存
+          # 指定子模块目录下的 pnpm-lock.yaml 路径，解决锁文件找不到的问题
+          cache-dependency-path: ./src/weapp/pnpm-lock.yaml
+
+      # 第三步: 安装依赖
+      - name: Install dependencies in weapp
+        working-directory: ./src/weapp # 直接指定子模块工作目录
+        run: pnpm install # 安装子模块依赖
+
+      # 第四步: 运行构建命令
+      - name: Build weapp preview package
+        working-directory: ./src/weapp
+        run: npm run build:weapp:preview # 执行小程序预览构建命令
+
+
+      # 可选：上传构建产物作为Artifacts，方便下载查看
+      # - name: Upload build artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: weapp-client-preview
+      #     path: packages/weapp-client/dist  # 替换为实际的构建产物目录
+      #     retention-days: 7  # 产物保留7天
