@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
     paths:
+    - 'src/weapp'
     - 'src/weapp/**'
     - '.github/workflows/weapp-client-build-preview.yml'
   pull_request:
