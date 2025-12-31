@@ -62,4 +62,5 @@ jobs:
           echo "QR_BASE64=$QR_BASE64" >> $GITHUB_OUTPUT
 
       - name: Output QR code Base64
-        run: echo $QR_BASE64
+        run: |
+          echo steps.qrcode-base64.outputs.QR_BASE64
