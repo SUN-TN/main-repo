@@ -3,14 +3,13 @@ on:
   push:
     branches: [main]
     paths:
-    - 'src/weapp'
-    - 'src/weapp/**'
-    - '.github/workflows/weapp-client-build-preview.yml'
+      - "src/weapp"
+      - "src/weapp/**"
+      - ".github/workflows/weapp-client-build-preview.yml"
   pull_request:
     branches: [main]
 
 jobs:
-
   build-weapp-client:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm' # 现在能找到 pnpm，正常解析缓存
+          cache: "pnpm" # 现在能找到 pnpm，正常解析缓存
           # 指定子模块目录下的 pnpm-lock.yaml 路径，解决锁文件找不到的问题
           cache-dependency-path: ./src/weapp/pnpm-lock.yaml
 
@@ -46,11 +45,21 @@ jobs:
         working-directory: ./src/weapp
         run: npm run build:weapp:preview # 执行小程序预览构建命令
 
-
       # 可选：上传构建产物作为Artifacts，方便下载查看
       # - name: Upload build artifacts
       #   uses: actions/upload-artifact@v4
       #   with:
       #     name: weapp-client-preview
-      #     path: packages/weapp-client/dist  # 替换为实际的构建产物目录
-      #     retention-days: 7  # 产物保留7天
+      #     path: packages/weapp-client/dist # 替换为实际的构建产物目录
+      #     retention-days: 7 # 产物保留7天
+
+      - name: Convert QR code to Base64
+        id: qrcode-base64
+        run: |
+          # 读取图片并转为 Base64（ubuntu 内置 base64 命令）
+          QR_BASE64=$(base64 -w 0 ./src/weapp/dist/preview.jpg)
+          # 将 Base64 输出为 Actions 环境变量，供后续步骤使用
+          echo "QR_BASE64=$QR_BASE64" >> $GITHUB_OUTPUT
+
+      - name: Output QR code Base64
+        run: echo $QR_BASE64
