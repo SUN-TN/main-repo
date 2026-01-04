@@ -66,5 +66,22 @@ jobs:
 
       - name: Output QR code Base64
         run: |
-          echo steps.qrcode-base64.outputs.QR_BASE64
           echo " ${{ steps.qrcode-base64.outputs.QR_BASE64 }} "
+
+    outputs:
+      qr_base64: "${{steps.qrcode-base64.outputs.QR_BASE64}}"
+
+  send-event:
+    needs: build-weapp-client
+    name: Webhook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: SUN-TN/feishu-bot-webhook-action@main
+        with:
+          webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
+          signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
+          template_id: "AAqXJ8MbsxzKL"
+          template_data: |
+            {
+              "preview_img": "${{ needs.build-weapp-client.outputs.qr_base64 }}"
+            }
