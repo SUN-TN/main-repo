@@ -84,6 +84,6 @@ jobs:
           template_data: |
             {
               "preview_img": {
-                "img_base64": "data:image/jpeg;base64,${{ needs.build-weapp-client.outputs.qr_base64 }}"  
+                "img_key": "data:image/jpeg;base64,${{ needs.build-weapp-client.outputs.qr_base64 }}"  
               }
             }
