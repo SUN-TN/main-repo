@@ -83,5 +83,7 @@ jobs:
           template_id: "AAqXJ8MbsxzKL"
           template_data: |
             {
-              "preview_img": "${{ needs.build-weapp-client.outputs.qr_base64 }}"
+              "preview_img": {
+                "img_base64": "data:image/jpeg;base64,${{ needs.build-weapp-client.outputs.qr_base64 }}"  
+              }
             }
