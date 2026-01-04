@@ -61,7 +61,7 @@ jobs:
           # 输出Base64 查看生成结果
           echo -e "\033[32m✅ 构建成功！\033[0m"
           echo -e "\033[32m✅ $QR_BASE64  \033[0m"
-          # 将 Base64 输出为 Actions 环境变量，供后续步骤使用
+          # 将 Base64  输出为 Actions 环境变量，供后续步骤使用
           echo "QR_BASE64=$QR_BASE64" >> $GITHUB_OUTPUT
 
       - name: Output QR code Base64
