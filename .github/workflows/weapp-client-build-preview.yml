@@ -76,16 +76,26 @@ jobs:
     name: Webhook
     runs-on: ubuntu-latest
     steps:
-      - name: 转义 Base64 特殊字符
-        id: escape-base64
+      - name: Install jq
+        run: sudo apt-get install jq -y
+        shell: bash
+
+        # 新增步骤：构造合法的 template_data JSON
+      - name: Build template data
+        id: build-template-data
         run: |
-          ESCAPED_QR_BASE64=$(echo "${{ needs.build-weapp-client.outputs.qr_base64 }}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\n/\\n/g')
-          echo "ESCAPED_QR_BASE64=$ESCAPED_QR_BASE64" >> $GITHUB_OUTPUT
+          # 构造 JSON（用 jq 保证语法合法，需先安装 jq）
+          TEMPLATE_DATA=$(jq -n \
+            --arg base64 "${{ needs.build-weapp-client.outputs.qr_base64 }}" \
+            '{"preview_img":{"image_base64":$base64,"image_key":$base64}}')
+          # 输出为 Actions 变量
+          echo "TEMPLATE_DATA=$TEMPLATE_DATA" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: 发送飞书通知
         uses: SUN-TN/feishu-bot-webhook-action@main
         with:
           webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
           signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
           template_id: "AAqXJ8MbsxzKL"
-          # 先通过 shell 转义 Base64，再构造合法 JSON
-          template_data: ${{ format('{ " preview_img":{"image_base64":"{0}","image_key":"{1}" } }', needs.build-weapp-client.outputs.qr_base64,needs.build-weapp-client.outputs.qr_base64) }}
+          template_data: ${{ steps.build-template-data.outputs.TEMPLATE_DATA }}
