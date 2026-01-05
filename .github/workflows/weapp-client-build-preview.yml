@@ -87,9 +87,5 @@ jobs:
           webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
           signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
           template_id: "AAqXJ8MbsxzKL"
-          template_data: |
-            {
-              "preview_img": {
-                "img_key": "data:image/jpeg;base64,${{ steps.escape-base64.outputs.ESCAPED_QR_BASE64 }}"  
-              }
-            }
+          # 先通过 shell 转义 Base64，再构造合法 JSON
+          template_data: ${{ format('{ " preview_img":{"image_base64":"{0}","image_key":"{1}" } }', needs.build-weapp-client.outputs.qr_base64,needs.build-weapp-client.outputs.qr_base64) }}
