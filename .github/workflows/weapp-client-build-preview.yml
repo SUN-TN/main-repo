@@ -76,7 +76,13 @@ jobs:
     name: Webhook
     runs-on: ubuntu-latest
     steps:
-      - uses: SUN-TN/feishu-bot-webhook-action@main
+      - name: 转义 Base64 特殊字符
+        id: escape-base64
+        run: |
+          ESCAPED_QR_BASE64=$(echo "${{ needs.build-weapp-client.outputs.qr_base64 }}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\n/\\n/g')
+          echo "ESCAPED_QR_BASE64=$ESCAPED_QR_BASE64" >> $GITHUB_OUTPUT
+      - name: 发送飞书通知
+        uses: SUN-TN/feishu-bot-webhook-action@main
         with:
           webhook: ${{ secrets.FEISHU_BOT_WEBHOOK }}
           signkey: ${{ secrets.FEISHU_BOT_SIGNKEY }}
@@ -84,6 +90,6 @@ jobs:
           template_data: |
             {
               "preview_img": {
-                "img_key": "data:image/jpeg;base64,${{ needs.build-weapp-client.outputs.qr_base64 }}"  
+                "img_key": "data:image/jpeg;base64,${{ steps.escape-base64.outputs.ESCAPED_QR_BASE64 }}"  
               }
             }
