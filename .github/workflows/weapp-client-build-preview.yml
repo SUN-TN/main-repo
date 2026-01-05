@@ -87,7 +87,7 @@ jobs:
           # 构造 JSON（用 jq 保证语法合法，需先安装 jq）
           TEMPLATE_DATA=$(jq -nc \
             --arg base64 "${{ needs.build-weapp-client.outputs.qr_base64 }}" \
-            '{"preview_img":{"image_base64":$base64,"image_key":$base64}}')
+            '{"preview_img":{"img_base64":$base64,"img_key":$base64}}')
           # 输出为 Actions 变量
           echo "TEMPLATE_DATA=$TEMPLATE_DATA" >> $GITHUB_OUTPUT
         shell: bash
